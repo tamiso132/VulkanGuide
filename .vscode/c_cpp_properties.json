@@ -1,19 +1,41 @@
 {
+    "env": {
+        "myIncludePath": [
+            "${workspaceFolder}",
+            "${workspaceFolder}/src",
+            "./thirdparty/vk-bootstrap/src"
+        ],
+        "myDefines": [
+            "DEBUG",
+            "MY_FEATURE=1"
+        ]
+    },
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/include/SDL2"
-            ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
-            "compilerArgs": []
+            "compilerArgs": [],
+            "browse": {
+                "path": [
+                    "${myIncludePath}",
+                    "/usr/include",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db"
+            },
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/thirdparty/vk-bootstrap/src",
+                "${workspaceFolder}",
+                "${workspaceFolder}/**"
+            ]
         }
-        
     ],
     "version": 4
 }

@@ -1,14 +1,13 @@
-#include <vk_engine.h>
+#include "vk_engine.h"
 
-int main(int argc, char *argv[])
-{
-	VulkanEngine engine;
-	fmt::println("hello my friend\n");
-	engine.init();
+int main(int argc, char *argv[]) {
+  VulkanEngine engine;
+  fmt::println("hello my friend\n");
+  engine.init();
 
-	engine.run();
+  engine.run();
 
-	engine.cleanup();
+  engine.cleanup();
 
-	return 0;
+  return 0;
 }
