@@ -1,0 +1,6 @@
+[submodule "thirdparty/vk-bootstrap"]
+	path = thirdparty/vk-bootstrap
+	url = https://github.com/charles-lunarg/vk-bootstrap
+[submodule "thirdparty/fastgltf"]
+	path = thirdparty/fastgltf
+	url = https://github.com/spnda/fastgltf.git
