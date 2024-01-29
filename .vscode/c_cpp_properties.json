@@ -19,15 +19,6 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
             "compilerArgs": [],
-            "browse": {
-                "path": [
-                    "${myIncludePath}",
-                    "/usr/include",
-                    "${workspaceFolder}"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db"
-            },
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/src",
