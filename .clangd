@@ -1,0 +1,3 @@
+{
+    "clangd.path": "clangd",  # Path to the clangd executable
+}

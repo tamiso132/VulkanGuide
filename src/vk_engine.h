@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-
-
 #include "../thirdparty/Vma/vk_mem_alloc.h"
 #include "vk_types.h"
 
@@ -83,12 +81,15 @@ private:
 
   DeletionQueue _mainDeletionQueue;
   VmaAllocator _allocator;
+  AllocatedImage _drawImage;
+  VkExtent2D _drawExtent;
 
   void init_vulkan();
   void init_swapchain();
   void init_commands();
   void init_sync_structures();
 
+  void draw_background(VkCommandBuffer cmd);
   void create_swapchain(uint32_t width, uint32_t height);
   void destroy_swapchain();
 };
