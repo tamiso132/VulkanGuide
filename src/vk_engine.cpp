@@ -1,14 +1,19 @@
-﻿#define VMA_IMPLEMENTATION
+﻿#include "vk_descriptors.h"
+#include <fmt/core.h>
+#include <vector>
+#include <vulkan/vulkan_core.h>
+#define VMA_IMPLEMENTATION
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
+#include "../thirdparty/vk-bootstrap/src/VkBootstrap.h"
 #include "vk_engine.h"
 #include "vk_images.h"
 #include "vk_initializers.h"
-#include "vk_types.h"
+#include "vk_pipelines.h"
 
-#include "../thirdparty/vk-bootstrap/src/VkBootstrap.h"
+#include "vk_types.h"
 
 #include <chrono>
 #include <thread>
@@ -31,24 +36,24 @@ void VulkanEngine::init() {
                              SDL_WINDOWPOS_UNDEFINED, _windowExtent.width,
                              _windowExtent.height, window_flags);
 
-  // everything went fine
-
   this->init_vulkan();
-
-  this->init_swapchain();
-
-  this->init_commands();
-
-  this->init_sync_structures();
 
   VmaAllocatorCreateInfo allocatorInfo = {};
   allocatorInfo.physicalDevice = _chosenGPU;
   allocatorInfo.device = _device;
   allocatorInfo.instance = _instance;
   allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+  fmt::println("does it come here?");
   vmaCreateAllocator(&allocatorInfo, &_allocator);
-
   _mainDeletionQueue.push_function([&]() { vmaDestroyAllocator(_allocator); });
+
+  // everything went fine
+  this->init_swapchain();
+  this->init_commands();
+  this->init_sync_structures();
+  this->init_descriptors();
+  this->init_pipelines();
+
   _isInitialized = true;
 }
 
@@ -204,6 +209,54 @@ void VulkanEngine::init_sync_structures() {
     VK_CHECK(vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr,
                                &_frames[i]._renderSemaphore));
   }
+}
+
+void VulkanEngine::init_descriptors() {
+
+  std::vector<DescriptorAllocator::PoolSizeRatio> sizes = {
+      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE}};
+  globalDescriptorAllocator.init_pool(_device, 10, sizes);
+
+  {
+    DescriptorLayoutBuilder builder;
+    builder.add_binding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
+    _drawImageDescriptorLayout =
+        builder.build(_device, VK_SHADER_STAGE_COMPUTE_BIT);
+  }
+
+  _drawImageDescriptors =
+      globalDescriptorAllocator.allocate(_device, _drawImageDescriptorLayout);
+
+  VkDescriptorImageInfo imgInfo{};
+  imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+  imgInfo.imageView = _drawImage.imageView;
+
+  VkWriteDescriptorSet drawImageWrite = {};
+  drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  drawImageWrite.pNext = nullptr;
+
+  drawImageWrite.dstBinding = 0;
+  drawImageWrite.dstSet = _drawImageDescriptors;
+  drawImageWrite.descriptorCount = 1;
+  drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+  drawImageWrite.pImageInfo = &imgInfo;
+
+  vkUpdateDescriptorSets(_device, 1, &drawImageWrite, 0, nullptr);
+}
+
+void VulkanEngine::init_pipelines() { this->init_background_pipelines(); }
+
+void VulkanEngine::init_background_pipelines() {
+  VkPipelineLayoutCreateInfo computeLayout{};
+  computeLayout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  computeLayout.pNext = nullptr;
+  computeLayout.pSetLayouts = &_drawImageDescriptorLayout;
+  computeLayout.setLayoutCount = 1;
+
+  VK_CHECK(vkCreatePipelineLayout(_device, &computeLayout, nullptr,
+                                  &_gradientPipelineLayout));
+
+  VkShaderModule computerDrawShader;
 }
 
 void VulkanEngine::cleanup() {
