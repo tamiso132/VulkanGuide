@@ -91,7 +91,7 @@ private:
   VkDescriptorSet _drawImageDescriptors;
   VkDescriptorSetLayout _drawImageDescriptorLayout;
 
-  VkPipelineLayout _gradientPipeline;
+  VkPipeline _gradientPipeline;
   VkPipelineLayout _gradientPipelineLayout;
 
   void init_vulkan();
