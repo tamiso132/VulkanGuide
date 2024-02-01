@@ -8,8 +8,9 @@ bool vkutil::load_shader_module(const char *filePath, VkDevice device,
                                 VkShaderModule *outShaderModule) {
   // open the file. With cursor at the end
   std::ifstream file(filePath, std::ios::ate | std::ios::binary);
-
   if (!file.is_open()) {
+
+    std::cerr << "File path: " << filePath << std::endl;
     int errorCode =
         errno; // errno is a global variable that holds the error code
     const char *errorMessage = strerror(errorCode);
@@ -25,7 +26,7 @@ bool vkutil::load_shader_module(const char *filePath, VkDevice device,
   size_t fileSize = (size_t)file.tellg();
 
   // spirv expects the buffer to be on uint32, so make sure to reserve a int1321
-  
+
   // vector big enough for the entire file
   std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
 

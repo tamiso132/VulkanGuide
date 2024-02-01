@@ -315,14 +315,16 @@ void VulkanEngine::init_background_pipelines() {
 
   //> comp_pipeline_multi
   VkShaderModule gradientShader;
-  if (!vkutil::load_shader_module("../shaders/gradient_color_compute.spv", _device,
-                                  &gradientShader)) {
+  if (!vkutil::load_shader_module("/home/tom/projects/c++/vulkan-guide/shaders/"
+                                  "gradient_color_compute.spv",
+                                  _device, &gradientShader)) {
     fmt::print("Error when building the compute shader \n");
   }
 
   VkShaderModule skyShader;
-  if (!vkutil::load_shader_module("../shaders/sky_compute.spv", _device,
-                                  &skyShader)) {
+  if (!vkutil::load_shader_module(
+          "/home/tom/projects/c++/vulkan-guide/shaders/sky_compute.spv",
+          _device, &skyShader)) {
     fmt::print("Error when building the compute shader \n");
   }
 
@@ -376,8 +378,8 @@ void VulkanEngine::init_background_pipelines() {
   vkDestroyShaderModule(_device, skyShader, nullptr);
   _mainDeletionQueue.push_function([&]() {
     vkDestroyPipelineLayout(_device, _gradientPipelineLayout, nullptr);
-    vkDestroyPipeline(_device, sky.pipeline, nullptr);
-    vkDestroyPipeline(_device, gradient.pipeline, nullptr);
+    vkDestroyPipeline(_device, this->backgroundEffects[0].pipeline, nullptr);
+    vkDestroyPipeline(_device, this->backgroundEffects[1].pipeline, nullptr);
   });
 }
 
@@ -386,7 +388,6 @@ void VulkanEngine::cleanup() {
 
     // make sure the gpu has stopped doing its things
     vkDeviceWaitIdle(_device);
-    globalDescriptorAllocator.clear_descriptors(_device);
     for (auto &frame : _frames) {
     }
 
@@ -406,7 +407,9 @@ void VulkanEngine::cleanup() {
     destroy_swapchain();
 
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
-
+    globalDescriptorAllocator.clear_descriptors(_device);
+    globalDescriptorAllocator.destroy_pool(_device);
+    vkDestroyDescriptorSetLayout(_device, _drawImageDescriptorLayout, nullptr);
     vkDestroyDevice(_device, nullptr);
     vkb::destroy_debug_utils_messenger(_instance, _debug_messenger);
     vkDestroyInstance(_instance, nullptr);
@@ -509,17 +512,19 @@ void VulkanEngine::init_imgui() {
 }
 
 void VulkanEngine::draw() {
-  VK_CHECK(vkWaitForFences(_device, 1, &this->get_current_frame()._renderFence,
-                           true, 1000000000));
-  this->get_current_frame()._deletionQueue.flush();
-  VK_CHECK(vkResetFences(_device, 1, &this->get_current_frame()._renderFence));
+
+  FrameData current_frame = this->get_current_frame();
+  VK_CHECK(vkWaitForFences(_device, 1, &current_frame._renderFence, true,
+                           1000000000));
+  current_frame._deletionQueue.flush();
+  VK_CHECK(vkResetFences(_device, 1, &current_frame._renderFence));
 
   uint32_t swapchainImageIndex;
   VK_CHECK(vkAcquireNextImageKHR(_device, _swapchain, 1000000000,
-                                 this->get_current_frame()._swapchainSemaphore,
-                                 nullptr, &swapchainImageIndex));
+                                 current_frame._swapchainSemaphore, nullptr,
+                                 &swapchainImageIndex));
 
-  VkCommandBuffer cmd = this->get_current_frame()._mainCommandBuffer;
+  VkCommandBuffer cmd = current_frame._mainCommandBuffer;
 
   VK_CHECK(vkResetCommandBuffer(cmd, 0));
 
@@ -567,16 +572,15 @@ void VulkanEngine::draw() {
   VkCommandBufferSubmitInfo cmdInfo = vkinit::command_buffer_submit_info(cmd);
   VkSemaphoreSubmitInfo waitInfo = vkinit::semaphore_submit_info(
       VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
-      this->get_current_frame()._swapchainSemaphore);
-  VkSemaphoreSubmitInfo signalInfo =
-      vkinit::semaphore_submit_info(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT,
-                                    get_current_frame()._renderSemaphore);
+      current_frame._swapchainSemaphore);
+  VkSemaphoreSubmitInfo signalInfo = vkinit::semaphore_submit_info(
+      VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT, current_frame._renderSemaphore);
 
   VkSubmitInfo2 submit = vkinit::submit_info(&cmdInfo, &signalInfo, &waitInfo);
   // submit command buffer to the queue and execute it.
   // _renderFence will now block until the graphic commands finish execution
-  VK_CHECK(vkQueueSubmit2(_graphicQueue, 1, &submit,
-                          get_current_frame()._renderFence));
+  VK_CHECK(
+      vkQueueSubmit2(_graphicQueue, 1, &submit, current_frame._renderFence));
 
   VkPresentInfoKHR presentInfo = {};
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -584,7 +588,7 @@ void VulkanEngine::draw() {
   presentInfo.pSwapchains = &_swapchain;
   presentInfo.swapchainCount = 1;
 
-  presentInfo.pWaitSemaphores = &this->get_current_frame()._renderSemaphore;
+  presentInfo.pWaitSemaphores = &current_frame._renderSemaphore;
   presentInfo.waitSemaphoreCount = 1;
 
   presentInfo.pImageIndices = &swapchainImageIndex;
@@ -634,7 +638,7 @@ void VulkanEngine::run() {
 
       ComputeEffect &selected = backgroundEffects[currentBackgroundEffect];
 
-      ImGui::Text("Selected effect: ", selected.name);
+      ImGui::Text("Selected effect: %s", selected.name);
 
       ImGui::SliderInt("Effect Index", &currentBackgroundEffect, 0,
                        backgroundEffects.size() - 1);
