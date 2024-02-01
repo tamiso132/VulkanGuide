@@ -94,6 +94,10 @@ private:
   VkPipeline _gradientPipeline;
   VkPipelineLayout _gradientPipelineLayout;
 
+  VkFence _immFence;
+  VkCommandBuffer _immCommandBuffer;
+  VkCommandPool _immCommandPool;
+
   void init_vulkan();
   void init_swapchain();
   void init_commands();
@@ -105,4 +109,7 @@ private:
   void draw_background(VkCommandBuffer cmd);
   void create_swapchain(uint32_t width, uint32_t height);
   void destroy_swapchain();
+
+  void immediate_submit(std::function<void(VkCommandBuffer cmd)> &&function);
+  void init_imgui();
 };

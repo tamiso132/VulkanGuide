@@ -16,9 +16,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(thirdparty/vk-bootstrap)
 add_subdirectory(src)
+add_subdirectory(thirdparty/imgui)
 
 
 
 target_include_directories(VulkanGuide PRIVATE src)
-target_include_directories(VulkanGuide PRIVATE thirdparty/stb_image thirdparty/Vma thirdparty/fastgltf)
+target_include_directories(VulkanGuide PRIVATE thirdparty/stb_image thirdparty/Vma thirdparty/fastgltf thirdparty/imgui thirdparty/imgui/backends)
 
