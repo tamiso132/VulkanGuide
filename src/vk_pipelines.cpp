@@ -1,6 +1,8 @@
 ﻿#include "vk_pipelines.h"
 #include "vk_initializers.h"
 #include <fstream>
+#include <iostream>
+#include <string>
 
 bool vkutil::load_shader_module(const char *filePath, VkDevice device,
                                 VkShaderModule *outShaderModule) {
@@ -8,6 +10,13 @@ bool vkutil::load_shader_module(const char *filePath, VkDevice device,
   std::ifstream file(filePath, std::ios::ate | std::ios::binary);
 
   if (!file.is_open()) {
+    int errorCode =
+        errno; // errno is a global variable that holds the error code
+    const char *errorMessage = strerror(errorCode);
+
+    // Print the error message
+    std::cerr << "Error code: " << errorCode << ", Message: " << errorMessage
+              << std::endl;
     return false;
   }
 
@@ -15,7 +24,8 @@ bool vkutil::load_shader_module(const char *filePath, VkDevice device,
   // because the cursor is at the end, it gives the size directly in bytes
   size_t fileSize = (size_t)file.tellg();
 
-  // spirv expects the buffer to be on uint32, so make sure to reserve a int
+  // spirv expects the buffer to be on uint32, so make sure to reserve a int1321
+  
   // vector big enough for the entire file
   std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
 

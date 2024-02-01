@@ -35,10 +35,8 @@ DescriptorLayoutBuilder::build(VkDevice device,
 
 void DescriptorAllocator::init_pool(VkDevice device, uint32_t maxSets,
                                     std::span<PoolSizeRatio> poolRatios) {
-
   std::vector<VkDescriptorPoolSize> poolSizes;
   for (PoolSizeRatio ratio : poolRatios) {
-
     poolSizes.push_back(VkDescriptorPoolSize{
         .type = ratio.type,
         .descriptorCount = uint32_t(ratio.ratio * maxSets)});
