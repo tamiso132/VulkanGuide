@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "../thirdparty/Vma/vk_mem_alloc.h"
+#include "loader/vk_loader.h"
 #include "vk_descriptors.h"
 #include "vk_types.h"
-#include <vulkan/vulkan_core.h>
+#include "vulkan/vulkan_core.h"
 
 struct ComputePushConstants {
   glm::vec4 data1;
@@ -72,6 +73,9 @@ public:
   // run main loop
   void run();
 
+  GPUMeshBuffers uploadMesh(std::span<uint32_t> indices,
+                            std::span<Vertex> vertices);
+
 private:
   // basic pieces
   VkInstance _instance;
@@ -107,15 +111,21 @@ private:
   VkDescriptorSet _drawImageDescriptors;
   VkDescriptorSetLayout _drawImageDescriptorLayout;
 
-  VkPipeline _gradientPipeline;
-  VkPipelineLayout _gradientPipelineLayout;
-
   VkFence _immFence;
   VkCommandBuffer _immCommandBuffer;
   VkCommandPool _immCommandPool;
 
   std::vector<ComputeEffect> backgroundEffects;
   int currentBackgroundEffect{0};
+
+  VkPipelineLayout _trianglePipelineLayout;
+  VkPipeline _trianglePipeline;
+
+  VkPipelineLayout _meshPipelineLayout;
+  VkPipeline _meshPipeline;
+
+  GPUMeshBuffers rectangle;
+  std::vector<std::shared_ptr<MeshAsset>> testMeshes;
 
   void init_vulkan();
   void init_swapchain();
@@ -124,12 +134,20 @@ private:
   void init_descriptors();
   void init_pipelines();
   void init_background_pipelines();
+  void init_triangle_pipeline();
+  void init_imgui();
+  void init_mesh_pipeline();
+  void init_default_data();
+
+  void create_swapchain(uint32_t width, uint32_t height);
+  AllocatedBuffer create_buffer(size_t allocSize, VkBufferUsageFlags usage,
+                                VmaMemoryUsage memoryUsage);
 
   void draw_background(VkCommandBuffer cmd);
+  void draw_geometry(VkCommandBuffer cmd);
   void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
-  void create_swapchain(uint32_t width, uint32_t height);
-  void destroy_swapchain();
-
   void immediate_submit(std::function<void(VkCommandBuffer cmd)> &&function);
-  void init_imgui();
+
+  void destroy_swapchain();
+  void destroy_buffer(const AllocatedBuffer &buffer);
 };

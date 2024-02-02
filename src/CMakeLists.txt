@@ -1,4 +1,5 @@
 
+
 # Add source to this project's executable.
 set(SOURCE_FILES
   main.cpp
@@ -22,19 +23,22 @@ set(SOURCE_FILES
 
 
 find_package(Vulkan REQUIRED)
+find_package(glm REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+
+
 add_executable(VulkanGuide ${SOURCE_FILES})
 
 # Link the Vulkan library
 target_link_libraries(VulkanGuide PRIVATE Vulkan::Vulkan)
 target_link_libraries(VulkanGuide PRIVATE vk-bootstrap::vk-bootstrap)
 
-# Link the SDL2 library
-
-
 target_link_libraries(VulkanGuide PRIVATE ${SDL2_LIBRARIES})
 target_link_libraries(VulkanGuide PRIVATE fmt::fmt)
 
+target_link_libraries(VulkanGuide PRIVATE fastgltf::fastgltf)
 
+
+target_compile_options(VulkanGuide PRIVATE -w)
 target_include_directories(VulkanGuide PRIVATE loader)

@@ -8,7 +8,7 @@
           "program": "${workspaceFolder}/build/src/VulkanGuide",
           "args": [],
           "stopAtEntry": false,
-          "cwd": "${workspaceFolder}/src",
+          "cwd": "${workspaceFolder}",
           "environment": [],
           "externalConsole": false,
           "MIMode": "gdb",
