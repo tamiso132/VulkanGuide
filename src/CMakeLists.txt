@@ -18,6 +18,8 @@ set(SOURCE_FILES
   loader/vk_loader.cpp
   camera.cpp
   camera.h
+  meshes.cpp
+  meshes.h
 )
 
 

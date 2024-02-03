@@ -13,15 +13,20 @@
 #include "fastgltf/parser.hpp"
 #include "fastgltf/tools.hpp"
 
+#include <string.h>
+
 std::optional<std::vector<std::shared_ptr<MeshAsset>>>
 loadGltfMeshes(VulkanEngine *engine, std::filesystem::path filePath) {
-  auto projectRoot = PROJECT_ROOT_PATH;
+  //> openmesh
+  std::cout << "Loading GLTF: " << filePath << std::endl;
 
   fastgltf::GltfDataBuffer data;
+ 
   data.loadFromFile(filePath);
 
   constexpr auto gltfOptions = fastgltf::Options::LoadGLBBuffers |
                                fastgltf::Options::LoadExternalBuffers;
+
   fastgltf::Asset gltf;
   fastgltf::Parser parser{};
 
@@ -33,6 +38,8 @@ loadGltfMeshes(VulkanEngine *engine, std::filesystem::path filePath) {
                fastgltf::to_underlying(load.error()));
     return {};
   }
+  //< openmesh
+  //> loadmesh
   std::vector<std::shared_ptr<MeshAsset>> meshes;
 
   // use the same vectors for all meshes so that the memory doesnt reallocate as
@@ -131,6 +138,8 @@ loadGltfMeshes(VulkanEngine *engine, std::filesystem::path filePath) {
 
     meshes.emplace_back(std::make_shared<MeshAsset>(std::move(newmesh)));
   }
-  int x = 5;
+
   return meshes;
+
+  //< loadmesh
 }
