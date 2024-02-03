@@ -1,3 +1,4 @@
+//> all
 #version 450
 #extension GL_EXT_buffer_reference : require
 
@@ -34,3 +35,4 @@ void main() {
   outUV.x = v.uv_x;
   outUV.y = v.uv_y;
 }
+//< all

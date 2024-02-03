@@ -5,9 +5,9 @@ cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
-
 # Project name
 project(VulkanGuide)
+add_compile_definitions(PROJECT_ROOT_PATH="${CMAKE_SOURCE_DIR}")
 
 
 
@@ -25,5 +25,8 @@ add_subdirectory(thirdparty/imgui)
 add_subdirectory(thirdparty/fastgltf)
 
 
+
+
 target_include_directories(VulkanGuide PRIVATE src)
 target_include_directories(VulkanGuide PRIVATE thirdparty/stb_image thirdparty/Vma thirdparty/fastgltf/include thirdparty/imgui)
+

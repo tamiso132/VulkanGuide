@@ -7,10 +7,13 @@
 bool vkutil::load_shader_module(const char *filePath, VkDevice device,
                                 VkShaderModule *outShaderModule) {
   // open the file. With cursor at the end
-  std::ifstream file(filePath, std::ios::ate | std::ios::binary);
+
+  std::string path = std::string(PROJECT_ROOT_PATH) + "/" + filePath;
+
+  std::ifstream file(path, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
 
-    std::cerr << "File path: " << filePath << std::endl;
+    std::cerr << "File path: " << path << std::endl;
     int errorCode =
         errno; // errno is a global variable that holds the error code
     const char *errorMessage = strerror(errorCode);
@@ -184,6 +187,33 @@ void PipelineBuilder::set_multisampling_none() {
   _multisampling.alphaToOneEnable = VK_FALSE;
 }
 
+void PipelineBuilder::enable_blending_additive() {
+  _colorBlendAttachment.colorWriteMask =
+      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+  _colorBlendAttachment.blendEnable = VK_TRUE;
+  _colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+  _colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+  _colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+  _colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+  _colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+  _colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+}
+
+void PipelineBuilder::enable_blending_alphablend() {
+  _colorBlendAttachment.colorWriteMask =
+      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+  _colorBlendAttachment.blendEnable = VK_TRUE;
+  _colorBlendAttachment.srcColorBlendFactor =
+      VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+  _colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+  _colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+  _colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+  _colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+  _colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+}
+
 void PipelineBuilder::disable_blending() {
   // default write mask
   _colorBlendAttachment.colorWriteMask =
@@ -202,6 +232,18 @@ void PipelineBuilder::set_color_attachment_format(VkFormat format) {
 
 void PipelineBuilder::set_depth_format(VkFormat format) {
   _renderInfo.depthAttachmentFormat = format;
+}
+
+void PipelineBuilder::enable_depthtest(bool depthWriteEnable, VkCompareOp op) {
+  _depthStencil.depthTestEnable = VK_TRUE;
+  _depthStencil.depthWriteEnable = depthWriteEnable;
+  _depthStencil.depthCompareOp = op;
+  _depthStencil.depthBoundsTestEnable = VK_FALSE;
+  _depthStencil.stencilTestEnable = VK_FALSE;
+  _depthStencil.front = {};
+  _depthStencil.back = {};
+  _depthStencil.minDepthBounds = 0.f;
+  _depthStencil.maxDepthBounds = 1.f;
 }
 
 void PipelineBuilder::disable_depthtest() {
